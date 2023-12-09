@@ -1,0 +1,4 @@
+/music/*
+/downloads/*
+/__pycache__/*
+./config.py
