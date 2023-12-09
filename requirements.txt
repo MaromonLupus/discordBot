@@ -1,0 +1,4 @@
+disnake
+yt_dlp
+pytube
+aiohttp

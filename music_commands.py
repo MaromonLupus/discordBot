@@ -130,14 +130,14 @@ def setup(bot):
             await ctx.send("Playlist shuffled.")
         else:
             await ctx.send("Not enough songs in the queue to shuffle.")
-        @bot.command()
-        async def leave(ctx):
-            guild_id = ctx.guild.id
-            song_queue = get_song_queue(guild_id)
-            song_queue.clear()
+    @bot.command()
+    async def leave(ctx):
+        guild_id = ctx.guild.id
+        song_queue = get_song_queue(guild_id)
+        song_queue.clear()
 
-            if ctx.voice_client:
-                await ctx.voice_client.disconnect()
-                await ctx.send("Disconnected and cleared the queue.")
-            else:
-                await ctx.send("The bot is not connected to a voice channel.")
+        if ctx.voice_client:
+            await ctx.voice_client.disconnect()
+            await ctx.send("Disconnected and cleared the queue.")
+        else:
+            await ctx.send("The bot is not connected to a voice channel.")
