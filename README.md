@@ -42,14 +42,14 @@ python discord_bot.py
 python worker.py
 ```
 
-Your bot should now be online in your Discord server. Use commands like `!play`, `!skip`, `!shuffle`, etc., to interact with the bot.
+Your bot should now be online in your Discord server. Use commands like `/play`, `/skip`, `/shuffle`, etc., to interact with the bot.
 
 ## Commands
 
-- `!play [song/url]`: Plays the specified song or adds it to the queue.
-- `!skip`: Skips the current song.
-- `!shuffle`: Shuffles the current playlist.
-- `...`: Add other commands and their descriptions here.
+- `/play [song/url]`: Plays the specified song or adds it to the queue.
+- `/skip`: Skips the current song.
+- `/shuffle`: Shuffles the current playlist.
+- and many more that I'm too lazy to add
 
 ## License
 
