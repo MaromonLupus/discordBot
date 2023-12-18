@@ -1,9 +1,12 @@
 import json
+import os
+import aiohttp
+import disnake
 from disnake.ext import commands
 from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor
 
-from config import OPEN_API_KEY
+from config import DOWNLOAD_DIRECTORY_IMAGES, OPEN_API_KEY
 
 class OpenAICommands(commands.Cog):
     
@@ -44,7 +47,7 @@ class OpenAICommands(commands.Cog):
         except Exception as e:
             print(f"Error generating image with DALL-E: {e}")
             return None
-    
+        
     @commands.slash_command(
         name="generate_image",
         description="Generate an image using DALL-E with a given prompt"
@@ -52,8 +55,25 @@ class OpenAICommands(commands.Cog):
     async def generate_image(self, inter, prompt: str):
         await inter.response.defer()
         image_url = await self.generate_image_with_dalle(prompt)
+
         if image_url:
-            await inter.followup.send(f"Here's your generated image: {image_url}")
+            async with aiohttp.ClientSession() as session:
+                async with session.get(image_url) as resp:
+                    if resp.status == 200:
+                        # Create a directory to save images if it doesn't exist
+                        os.makedirs(DOWNLOAD_DIRECTORY_IMAGES, exist_ok=True)
+
+                        # Define a file path
+                        file_name = f'image_{prompt}.png'
+                        file_path = os.path.join(DOWNLOAD_DIRECTORY_IMAGES, file_name)
+
+                        # Write the image to a file
+                        with open(file_path, 'wb') as file:
+                            file.write(await resp.read())
+
+                        # Send the image file
+                        with open(file_path, 'rb') as file:
+                            await inter.followup.send(file=disnake.File(file, filename=file_name))
         else:
             await inter.followup.send("Sorry, I couldn't generate an image right now.")
     

@@ -7,7 +7,7 @@ import disnake
 from pytube import Playlist
 from UI_view import PaginationView
 
-from config import DOWNLOAD_DIRECTORY, SONG_PLAYLIST_NUMBER
+from config import DOWNLOAD_DIRECTORY_MUSIC, SONG_PLAYLIST_NUMBER
 import random
 
 # Global dictionary to hold song queues for different guilds
@@ -70,7 +70,7 @@ async def give_song(inter, search_query):
     Sends a request to the worker service to download the song.
     """
     worker_url = 'http://localhost:12345/search' 
-    payload = {'query': search_query, 'download_directory': DOWNLOAD_DIRECTORY}
+    payload = {'query': search_query, 'download_directory': DOWNLOAD_DIRECTORY_MUSIC}
 
     async with aiohttp.ClientSession() as session:
         async with session.post(worker_url, json=payload) as response:
@@ -100,8 +100,8 @@ def setup(bot):
             await inter.send("You need to join a voice channel first.")
             return
 
-        if not os.path.exists(DOWNLOAD_DIRECTORY):
-            os.makedirs(DOWNLOAD_DIRECTORY)
+        if not os.path.exists(DOWNLOAD_DIRECTORY_MUSIC):
+            os.makedirs(DOWNLOAD_DIRECTORY_MUSIC)
 
         if 'playlist' in search_query or 'list=' in search_query:
             playlist_urls = Playlist(search_query)
