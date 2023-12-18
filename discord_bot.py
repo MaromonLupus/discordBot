@@ -2,7 +2,8 @@ import disnake
 from disnake.ext import commands, tasks
 
 from config import BOT_TOKEN  # Import the configuration settings
-from music_commands import setup  # Import the music command setup
+import music_commands
+import open_ai_commands
 
 # Define intents for the bot
 intents = disnake.Intents.default()
@@ -37,8 +38,8 @@ async def on_ready():
     print(f'We have logged in as {bot.user}')
 
 # Setup the commands with the bot instance
-setup(bot)
-
+music_commands.setup(bot)
+open_ai_commands.setup(bot)
 # Start the inactivity check loop
 check_inactivity.start()
 
