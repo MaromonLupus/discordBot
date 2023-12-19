@@ -1,5 +1,5 @@
-import json
 import os
+import uuid
 import aiohttp
 import disnake
 from disnake.ext import commands
@@ -13,7 +13,7 @@ class OpenAICommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.executor = ThreadPoolExecutor(max_workers=5)
-        self.messages = [{"role": "system", "content": "You are a helpful assistant designed to output JSON."}]
+        self.messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
     async def generate_image_with_dalle(self, prompt):
         client = OpenAI(api_key=OPEN_API_KEY)
@@ -35,15 +35,14 @@ class OpenAICommands(commands.Cog):
         self.messages.append({"role": "user", "content": prompt})
         try:
             response = client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
-            response_format={ "type": "json_object" },
-            messages=self.messages
+                model="gpt-3.5-turbo",
+                messages=self.messages
             )
-            parsed_json = json.loads(response.choices[0].message.content)
+            response_content = response.choices[0].message.content
+            self.messages.append({"role": response.choices[0].message.role, "content": response_content})
 
             # Extract the first value
-            first_value = next(iter(parsed_json.values()), "No value found.")
-            return first_value
+            return response_content
         except Exception as e:
             print(f"Error generating image with DALL-E: {e}")
             return None
@@ -62,9 +61,9 @@ class OpenAICommands(commands.Cog):
                     if resp.status == 200:
                         # Create a directory to save images if it doesn't exist
                         os.makedirs(DOWNLOAD_DIRECTORY_IMAGES, exist_ok=True)
-
+                        random_hash = uuid.uuid4()
                         # Define a file path
-                        file_name = f'image_{prompt}.png'
+                        file_name = f'image_{prompt}_{random_hash}.png'
                         file_path = os.path.join(DOWNLOAD_DIRECTORY_IMAGES, file_name)
 
                         # Write the image to a file
@@ -85,7 +84,9 @@ class OpenAICommands(commands.Cog):
         await inter.response.defer()
         answer = await self.generate_answer_with_chat(prompt)
         if answer:
-            await inter.followup.send(f"{prompt}\n{answer}")
+            formatted_message = f"**Prompt:** {prompt}\n\n```{answer}```"
+            await inter.followup.send(formatted_message)
+
         else:
             await inter.followup.send("Sorry, I couldn't generate an ansswer right now.")
 
