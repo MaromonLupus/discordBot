@@ -10,5 +10,5 @@ DOWNLOAD_DIRECTORY_IMAGES = './image'
 # Number of songs that you want to see on your playlist call
 SONG_PLAYLIST_NUMBER = 5
 
-# Add a open ai api key here
-OPEN_API_KEY = "api_key_from_openai"
+#OPEN API key to talk with DALL-E and ChatGPT
+OPEN_API_KEY = "your_key_here"

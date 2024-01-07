@@ -41,33 +41,25 @@ class PaginationView(View):
         self.add_item(NextButton())
 
     async def update_message(self, inter):
-        # Calculate range of songs to display
         start_index = self.current_page * self.page_size
         end_index = start_index + self.page_size
         songs_to_display = self.songs[start_index:end_index]
 
-        # Format the message
-        formatted_message = "Songs in queue:\n"
+        formatted_message = "Songs in playlist: "+str(len(self.songs))+"\nSongs in queue:\n "
 
+        table = "┌─────┬────────────────────────────────────────────────────────┐\n"
+        table += "│ No. │ Song Name                                              │\n"
+        table += "├─────┼────────────────────────────────────────────────────────┤\n"
 
-        # Create table header
-        table = "┌─────┬────────────────────────────┐\n"
-        table += "│ No. │ Song Name                  │\n"
-        table += "├─────┼────────────────────────────┤\n"
-
-        # Add each song to the table
         for index, song in enumerate(songs_to_display, start=start_index + 1):
             song_name = os.path.basename(song)
-            # Ensure the song name fits in the column width
-            song_name = (song_name[:24] + '..') if len(song_name) > 26 else song_name
-            table += f"│ {index:<4}│ {song_name:<26} │\n"
+            song_name = (song_name[:52] + '..') if len(song_name) > 54 else song_name
+            table += f"│ {index:<4}│ {song_name:<54} │\n"
 
-        table += "└─────┴────────────────────────────┘"
+        table += "└─────┴────────────────────────────────────────────────────────┘"
 
-        formatted_message += (f"```{table}```")  # Use markdown for code block format
+        formatted_message += (f"```{table}```")
 
-
-        # Check if the interaction has already been responded to
         if inter.response.is_done():
             await inter.edit_original_response(content=formatted_message)
         else:

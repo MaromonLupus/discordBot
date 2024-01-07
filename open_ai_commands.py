@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 import aiohttp
@@ -63,7 +64,7 @@ class OpenAICommands(commands.Cog):
                         os.makedirs(DOWNLOAD_DIRECTORY_IMAGES, exist_ok=True)
                         random_hash = uuid.uuid4()
                         # Define a file path
-                        file_name = f'image_{prompt}_{random_hash}.png'
+                        file_name = f'image_{random_hash}.png'
                         file_path = os.path.join(DOWNLOAD_DIRECTORY_IMAGES, file_name)
 
                         # Write the image to a file

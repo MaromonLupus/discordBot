@@ -55,10 +55,8 @@ async def search_song(request):
     except Exception as e:
         return web.Response(text=str(e), status=500)
 
-# Set up the web application
 app = web.Application()
 app.add_routes([web.post('/search', search_song)])
 
-# Run the web server
 if __name__ == "__main__":
     web.run_app(app, port=12345)

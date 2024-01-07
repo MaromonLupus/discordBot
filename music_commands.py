@@ -10,7 +10,6 @@ from UI_view import PaginationView
 from config import DOWNLOAD_DIRECTORY_MUSIC, SONG_PLAYLIST_NUMBER
 import random
 
-# Global dictionary to hold song queues for different guilds
 song_queues = {}
 
 def get_song_queue(guild_id):
@@ -48,7 +47,26 @@ async def ensure_voice_client(inter):
             await inter.send("You are not connected to a voice channel.")
             return False
     return True
+async def add_random_songs_to_queue(inter, num_songs):
+    """
+    Adds a specified number of random songs from the DOWNLOAD_DIRECTORY_MUSIC 
+    to the guild's song queue and starts playing if not already playing.
+    """
+    songs = [os.path.join(DOWNLOAD_DIRECTORY_MUSIC, f) for f in os.listdir(DOWNLOAD_DIRECTORY_MUSIC)
+             if os.path.isfile(os.path.join(DOWNLOAD_DIRECTORY_MUSIC, f)) and f.endswith('.mp3')]
 
+    if len(songs) < num_songs:
+        await inter.send(f"Not enough songs in the download directory. Found {len(songs)} songs.")
+        return
+    
+    random_songs = random.sample(songs, num_songs)
+
+    song_queue = get_song_queue(inter.guild.id)
+    song_queue.extend(random_songs)
+
+    if not inter.guild.voice_client.is_playing():
+        await play_next_song(inter)
+        
 def after_song_play(error, inter):
     """
     Callback function after a song is played.
@@ -128,7 +146,7 @@ def setup(bot):
         song_queue = get_song_queue(guild_id)
 
         if len(song_queue) > 1:
-            random.shuffle(song_queue)  # Shuffle the queue
+            random.shuffle(song_queue)
             await inter.send("Playlist shuffled.")
         else:
             await inter.send("Not enough songs in the queue to shuffle.")
@@ -159,21 +177,35 @@ def setup(bot):
         else:
             await inter.send("No song is currently paused or playing.")
 
+
+    @bot.slash_command(description="Play a specified number of random songs from the download directory")
+    async def randomplay(inter, number_of_songs: int = 1):
+        await inter.response.defer()
+
+        if not await ensure_voice_client(inter):
+            return
+
+        if not inter.author.voice:
+            await inter.send("You need to join a voice channel first.")
+            return
+
+        if number_of_songs < 1:
+            await inter.send("Please enter a positive number of songs.")
+            return
+
+        await add_random_songs_to_queue(inter, number_of_songs)
+        await inter.edit_original_response(content=f"{number_of_songs} random song(s) from the library are now queued to play")
+
     @bot.slash_command(description="Lists all the songs in the current queue with pagination.")
     async def list_songs(inter):
         guild_id = inter.guild.id
         song_queue = get_song_queue(guild_id)
 
         if song_queue:
-            # Number of songs to display per page
-            page_size = SONG_PLAYLIST_NUMBER  # Adjust as needed
-
-            # Create the view for pagination
+            page_size = SONG_PLAYLIST_NUMBER
             view = PaginationView(list(song_queue), page_size)
-
-            # Send the initial message with the first page of songs
             await inter.response.send_message("Use the buttons to navigate through the song list.", view=view)
-            await view.update_message(inter)  # Corrected call to update_message
+            await view.update_message(inter)
         else:
             await inter.response.send_message("The song queue is currently empty.")
 
